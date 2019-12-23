@@ -2,17 +2,145 @@
 \addcontentsline{toc}{section}{Приложение А} 
 \begin{center} 
     \textbf{Приложение А}
+    \\
+    \textbf{(обязательное)}
+    \\
+    \textbf{Программный код}
 \end{center} 
 \vspace{8mm}
 \par
-Листинг А.1 -- Подпись
+Листинг А.1 -- Код программы для классификации данных компьютерного моделирования яркостной температуры
 \vspace{8mm}
 \large
 \begin{verbatim}
-class HelloWorld
-{
-    MessageBox.Show("Hello world!");         
-}
+import numpy as np
+import pandas as pd
+from sklearn import svm
+import matplotlib.pyplot as plt
+from sklearn import neighbors
+from sklearn.naive_bayes import GaussianNB
+from sklearn.utils import shuffle
+modelFolder = '075'
+def calcParams(testing, predict):
+    zdorovieTesting = 0
+    bolnieTesting = 0
+    for item in testing:    
+        if item == 0:
+            zdorovieTesting += 1
+        else:
+            bolnieTesting += 1
+    zdoroviePredict = 0
+    bolniePredict = 0
+    for item in predict:    
+        if item == 0:
+            zdoroviePredict += 1
+        else:
+            bolniePredict += 1	
+	chuvstv = bolniePredict / bolnieTesting
+	specifich = zdoroviePredict / zdorovieTesting
+	return chuvstv,specifich
+	
+data = pd.read_csv(modelFolder + '/data.csv', 
+delimiter=',', 
+names=['0ртм', '1ртм', '2ртм', '3ртм', '4ртм', '5ртм', '6ртм', '7ртм', '8ртм', 
+'0ик', '1ик', '2ик', '3ик', '4ик', '5ик', '6ик', '7ик', '8ик', 'target'])
+trainingTemperatures = data[['0ртм', '1ртм', '2ртм', '3ртм', '4ртм', '5ртм', 
+'6ртм', '7ртм', '8ртм', '0ик', '1ик', '2ик', '3ик', '4ик', '5ик', '6ик',
+'7ик', '8ик']]
+trainingTemperatures = shuffle(trainingTemperatures)
+trainingTemperatures.reset_index(inplace=True, drop=True)
+data.head()
+testingData = pd.read_csv(modelFolder + '/testing.csv', 
+delimiter=',', 
+names=['0ртм', '1ртм', '2ртм', '3ртм', '4ртм', '5ртм', '6ртм', '7ртм', '8ртм', 
+'0ик', '1ик', '2ик', '3ик', '4ик', '5ик', '6ик', '7ик', '8ик', 'target'])
+testingTemperatures = testingData[['0ртм', '1ртм', '2ртм', '3ртм', '4ртм',
+'5ртм', '6ртм', '7ртм', '8ртм', '0ик', '1ик', '2ик', '3ик', '4ик', '5ик',
+'6ик', '7ик', '8ик']]
+
+#SVM
+clf = svm.SVC(gamma='scale')
+clf.fit(trainingTemperatures, data.target)
+
+classes = clf.predict(testingTemperatures)
+
+testingData.target
+res = testingData.target == classes
+trueCount = 0
+for el in res:
+	if el == True:
+		trueCount += 1
+
+print('Правильно определено:', trueCount, '\nНеправильно:', len(res) - trueCount)
+chuvstv, specifich = calcParams(testingData.target, classes)
+print('Чувствительность:', chuvstv, '\nСпецифичность:', specifich);
+
+labels = 'Совпадает', 'Не совпадает'
+values = [trueCount, len(res) - trueCount]
+explode = (0.1, 0)
+
+fig1, ax1 = plt.subplots()
+ax1.pie(values, labels=labels, autopct='%1.1f%%',
+shadow=True, startangle=90)
+ax1.axis('equal')
+
+plt.show()
+
+#KNN
+clf = neighbors.KNeighborsClassifier(20, weights='uniform')
+clf.fit(trainingTemperatures, data.target)
+
+classes = clf.predict(testingTemperatures)
+
+testingData.target
+res = testingData.target == classes
+trueCount = 0
+for el in res:
+	if el == True:
+		trueCount += 1
+
+print('Правильно определено:', trueCount, '\nНеправильно:', len(res) - trueCount)
+chuvstv, specifich = calcParams(testingData.target, classes)
+print('Чувствительность:', chuvstv, '\nСпецифичность:', specifich);
+
+labels = 'Совпадает', 'Не совпадает'
+values = [trueCount, len(res) - trueCount]
+explode = (0.1, 0)
+
+fig1, ax1 = plt.subplots()
+ax1.pie(values, labels=labels, autopct='%1.1f%%',
+shadow=True, startangle=90)
+ax1.axis('equal')
+
+plt.show()
+
+#NB
+gnb = GaussianNB()
+clf = gnb.fit(trainingTemperatures, data.target)
+
+classes = clf.predict(testingTemperatures)
+
+testingData.target
+res = testingData.target == classes
+trueCount = 0
+for el in res:
+	if el == True:
+		trueCount += 1
+
+print('Правильно определено:', trueCount, '\nНеправильно:', len(res) - trueCount)
+chuvstv, specifich = calcParams(testingData.target, classes)
+print('Чувствительность:', chuvstv, '\nСпецифичность:', specifich);
+
+labels = 'Совпадает', 'Не совпадает'
+values = [trueCount, len(res) - trueCount]
+explode = (0.1, 0)
+
+fig1, ax1 = plt.subplots()
+ax1.pie(values, labels=labels, autopct='%1.1f%%',
+shadow=True, startangle=90)
+ax1.axis('equal')
+
+plt.show()
 \end{verbatim}
 \vspace{8mm}
 \Large
